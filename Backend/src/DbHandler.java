@@ -1,5 +1,5 @@
-
-
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,14 +46,20 @@ public class DbHandler {
 		return obj;
 	}
 	
-	public static JSONObject createpost(String id, String postText)
+	public static JSONObject createpost(String id, String postText, String imageString)
 	{
 		JSONObject obj = new JSONObject();
+		System.out.println(imageString);
 		try{   
 			Connection conn = DriverManager.getConnection(connString, userName, passWord);
-			PreparedStatement pStmt = conn.prepareStatement("insert into post(uid,text,timestamp) values(?,?,CURRENT_TIMESTAMP);");
+			PreparedStatement pStmt = conn.prepareStatement("insert into post(uid, text, timestamp, image) values(?,?,CURRENT_TIMESTAMP, ?);");
 			pStmt.setString(1, id);
 			pStmt.setString(2, postText);
+			if(imageString!=null) {
+				pStmt.setBinaryStream(3, new ByteArrayInputStream(imageString.getBytes(StandardCharsets.UTF_8.name())));
+			} else {
+				pStmt.setNull(3, Types.BLOB);
+			}
 			if(pStmt.executeUpdate()>0)
 			{
 				obj.put("status", true);
