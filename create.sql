@@ -1,4 +1,4 @@
-create sequence if not exists postid start 1;
+﻿create sequence if not exists postid start 1;
 create sequence if not exists commentid start 1;
 
 CREATE TABLE "user"(
@@ -34,7 +34,7 @@ CREATE TABLE post (
 	uid			VARCHAR(20),
 	timestamp	TIMESTAMP,
 	text		TEXT,
-	image		bytea default null,
+	image		BYTEA default null,
 	FOREIGN KEY (uid) REFERENCES "user"(uid)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE
