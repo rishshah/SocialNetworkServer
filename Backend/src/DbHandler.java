@@ -13,8 +13,8 @@ import org.json.JSONObject;
 
 public class DbHandler {
 	// connection strings
-	private static String connString = "jdbc:postgresql://localhost:5010/postgres";
-	private static String userName = "bharat";
+	private static String connString = "jdbc:postgresql://localhost:5432/postgres";
+	private static String userName = "rishshah";
 	private static String passWord = "";
 	
 	
@@ -60,7 +60,7 @@ public class DbHandler {
 				ByteArrayInputStream bs =  new ByteArrayInputStream(imageString.getBytes(StandardCharsets.UTF_8.name()));
 				pStmt.setBinaryStream(3,bs,(int)bs.available() );
 			} else {
-				pStmt.setNull(3, Types.BLOB);
+				pStmt.setNull(3, Types.BINARY);
 			}
 			if(pStmt.executeUpdate()>0)
 			{
