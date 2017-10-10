@@ -13,8 +13,8 @@ import org.json.JSONObject;
 
 public class DbHandler {
 	// connection strings
-	private static String connString = "jdbc:postgresql://localhost:5432/postgres";
-	private static String userName = "rishshah";
+	private static String connString = "jdbc:postgresql://localhost:5010/postgres";
+	private static String userName = "bharat";
 	private static String passWord = "";
 	
 	
@@ -57,7 +57,9 @@ public class DbHandler {
 			pStmt.setString(1, id);
 			pStmt.setString(2, postText);
 			if(imageString!=null) {
+				System.out.println(imageString.length());
 				ByteArrayInputStream bs =  new ByteArrayInputStream(imageString.getBytes(StandardCharsets.UTF_8.name()));
+				
 				pStmt.setBinaryStream(3,bs,(int)bs.available() );
 			} else {
 				pStmt.setNull(3, Types.BINARY);
@@ -157,7 +159,7 @@ public static JSONArray userFollow(String id){
 		try (
 		    Connection conn = DriverManager.getConnection(
 		    		connString, userName, "");
-		    PreparedStatement postSt = conn.prepareStatement("select name,postid,timestamp,post.uid as uid,text,image from post,\"user\" as us where post.uid = ? and post.uid = us.uid order by timestamp asc offset ? limit ?");
+		    PreparedStatement postSt = conn.prepareStatement("select name,postid,timestamp,post.uid as uid,text,image from post,\"user\" as us where post.uid = ? and post.uid = us.uid order by timestamp desc offset ? limit ?");
 		)
 		{
 
@@ -183,7 +185,7 @@ public static JSONArray userFollow(String id){
 		try (
 		    Connection conn = DriverManager.getConnection(
 		    		connString, userName, "");
-		    PreparedStatement postSt = conn.prepareStatement("select name, postid, timestamp, post.uid as uid, text, image from post,\"user\" as us where post.uid = ? and post.uid = us.uid order by timestamp asc offset ? limit ?");
+		    PreparedStatement postSt = conn.prepareStatement("select name, postid, timestamp, post.uid as uid, text, image from post,\"user\" as us where post.uid = ? and post.uid = us.uid order by timestamp desc offset ? limit ?");
 		)
 		{
 			postSt.setString(1, id);
@@ -209,13 +211,14 @@ public static JSONArray userFollow(String id){
 		try (
 		    Connection conn = DriverManager.getConnection(
 		    		connString, userName, "");
-			PreparedStatement postSt = conn.prepareStatement("select name, postid, timestamp, post.uid as uid, text, image from post, \"user\" as us where post.uid = us.uid and post.uid in (select uid2 from follows where uid1 = ? UNION select uid from \"user\" where uid=? ) order by timestamp asc offset ? limit ?");
+			PreparedStatement postSt = conn.prepareStatement("select name, postid, timestamp, post.uid as uid, text, image from post, \"user\" as us where post.uid = us.uid and post.uid in (select uid2 from follows where uid1 = ? UNION select uid from \"user\" where uid=? ) order by timestamp desc offset ? limit ?");
 		)
 		{	
 			postSt.setString(1, id);
 			postSt.setString(2,id);
 			postSt.setInt(3, offset);
 			postSt.setInt(4, limit);
+			System.out.println("Offset : " + offset + "  Limit :" + limit);
 			ResultSet rs = postSt.executeQuery();
 			json = ResultSetConverter(rs);
 			return json;
