@@ -55,6 +55,7 @@ public class SeePosts extends HttpServlet {
 			try {
 				obj.put("status", true);
 				obj.put("data",DbHandler.seePosts(id, offset, limit));
+				obj.put("offset", DbHandler.getOffset(id));
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

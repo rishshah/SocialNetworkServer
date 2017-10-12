@@ -204,7 +204,41 @@ public static JSONArray userFollow(String id){
 		return json;
 		
 	}
-	
+
+	public static int getOffset(String id) {
+		try (
+			    Connection conn = DriverManager.getConnection(
+			    		connString, userName, "");
+				PreparedStatement postSt = conn.prepareStatement("select lastoffset from \"user\" as us where us.uid = ? ");
+			)
+		{
+			postSt.setString(1,id);
+			ResultSet rs2 = postSt.executeQuery();
+			if(rs2.next())
+				return rs2.getInt("lastoffset");
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static void setOffset(String id, int offset) {
+		try (
+			    Connection conn = DriverManager.getConnection(
+			    		connString, userName, "");
+				PreparedStatement postSt = conn.prepareStatement("update \"user\" as us set lastoffset = ?  where us.uid = ? ");
+			)
+		{
+
+			postSt.setInt(1,offset);
+			postSt.setString(2,id);
+			postSt.executeUpdate();	
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static JSONArray seePosts(String id, int offset, int limit){
 		JSONArray json = new JSONArray();
 		
@@ -214,6 +248,10 @@ public static JSONArray userFollow(String id){
 			PreparedStatement postSt = conn.prepareStatement("select name, postid, timestamp, post.uid as uid, text, image from post, \"user\" as us where post.uid = us.uid and post.uid in (select uid2 from follows where uid1 = ? UNION select uid from \"user\" where uid=? ) order by timestamp desc offset ? limit ?");
 		)
 		{	
+			if(offset==-1) {
+				offset = getOffset(id);			
+			}
+			
 			postSt.setString(1, id);
 			postSt.setString(2,id);
 			postSt.setInt(3, offset);
@@ -221,6 +259,11 @@ public static JSONArray userFollow(String id){
 			System.out.println("Offset : " + offset + "  Limit :" + limit);
 			ResultSet rs = postSt.executeQuery();
 			json = ResultSetConverter(rs);
+			
+			if(offset!=-1) {	
+				setOffset(id,offset);
+			}
+			
 			return json;
 		} catch (SQLException | JSONException e) {
 			e.printStackTrace();
